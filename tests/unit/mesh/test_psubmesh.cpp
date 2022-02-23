@@ -7,7 +7,7 @@ using namespace mfem;
 
 TEST_CASE("ParSubMesh", "[Parallel],[ParSubMesh]")
 {
-   Mesh mesh = Mesh::MakeCartesian2D(5, 5, Element::QUADRILATERAL, true, 1.0,
+   Mesh mesh = Mesh::MakeCartesian2D(3, 3, Element::QUADRILATERAL, true, 1.0,
                                      1.0,
                                      false);
    for (int i = 0; i < mesh.GetNE(); i++)
@@ -79,8 +79,9 @@ TEST_CASE("ParSubMesh", "[Parallel],[ParSubMesh]")
    sol_sock << "parallel " << num_procs << " " << rank << "\n";
    sol_sock.precision(8);
    sol_sock << "mesh\n" << submesh << std::flush;
+   // sol_sock << "mesh\n" << pmesh << std::flush;
    // sol_sock << "solution\n" << pmesh << parent_gf << std::flush;
-   sol_sock << "keys ennnrRlm\n" << std::flush;
+   sol_sock << "keys ennrRlm\n" << std::flush;
 }
 
 #endif // MFEM_USE_MPI
