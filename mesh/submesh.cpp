@@ -21,8 +21,9 @@ SubMesh::SubMesh(const Mesh &parent, From from,
    if (from == From::Domain)
    {
       InitMesh(parent.Dimension(), parent.SpaceDimension(), 0, 0, 0);
-      auto [vtxids, elids] = SubMeshUtils::AddElementsToMesh(parent_, *this,
-                                                             attributes_);
+      Array<int> vtxids, elids;
+      std::tie(vtxids, elids) = SubMeshUtils::AddElementsToMesh(parent_, *this,
+                                                                attributes_);
       parent_vertex_ids_ = vtxids;
       parent_element_ids_ = elids;
    }

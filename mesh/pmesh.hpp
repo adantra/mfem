@@ -341,6 +341,7 @@ public:
    ///@}
 
    void GetSharedEdgeCommunicator(GroupCommunicator& sedge_comm);
+   void GetSharedVertexCommunicator(GroupCommunicator& svert_comm);
 
    void GenerateOffsets(int N, HYPRE_BigInt loc_sizes[],
                         Array<HYPRE_BigInt> *offsets[]) const;

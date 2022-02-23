@@ -1641,6 +1641,24 @@ void ParMesh::GetSharedEdgeCommunicator(GroupCommunicator& sedge_comm)
    sedge_comm.Finalize();
 }
 
+void ParMesh::GetSharedVertexCommunicator(GroupCommunicator& svert_comm)
+{
+   // initialize svert_comm
+   Table &gr_svert = svert_comm.GroupLDofTable();
+   // gr_svert differs from group_svert - the latter does not store gr. 0
+   gr_svert.SetDims(GetNGroups(), svert_lvert.Size());
+   gr_svert.GetI()[0] = 0;
+   for (int gr = 1; gr <= GetNGroups(); gr++)
+   {
+      gr_svert.GetI()[gr] = group_svert.GetI()[gr-1];
+   }
+   for (int k = 0; k < svert_lvert.Size(); k++)
+   {
+      gr_svert.GetJ()[k] = group_svert.GetJ()[k];
+   }
+   svert_comm.Finalize();
+}
+
 void ParMesh::MarkTetMeshForRefinement(DSTable &v_to_v)
 {
    Array<int> order;
@@ -3058,22 +3076,7 @@ void ParMesh::ReorientTetMesh()
 
    // create a GroupCommunicator over shared vertices
    GroupCommunicator svert_comm(gtopo);
-   {
-      // initialize svert_comm
-      Table &gr_svert = svert_comm.GroupLDofTable();
-      // gr_svert differs from group_svert - the latter does not store gr. 0
-      gr_svert.SetDims(GetNGroups(), svert_lvert.Size());
-      gr_svert.GetI()[0] = 0;
-      for (int gr = 1; gr <= GetNGroups(); gr++)
-      {
-         gr_svert.GetI()[gr] = group_svert.GetI()[gr-1];
-      }
-      for (int k = 0; k < svert_lvert.Size(); k++)
-      {
-         gr_svert.GetJ()[k] = group_svert.GetJ()[k];
-      }
-      svert_comm.Finalize();
-   }
+   GetSharedVertexCommunicator(svert_comm);
 
    // communicate the local index of each shared vertex from the group master to
    // other ranks in the group
