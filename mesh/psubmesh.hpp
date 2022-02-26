@@ -39,8 +39,24 @@ private:
    // Private constructor
    ParSubMesh(ParMesh &parent, SubMesh::From from, Array<int> &attributes);
 
+   void FindSharedVerticesRanks(Array<int> &rhvtx);
+
+   void FindSharedEdgesRanks(Array<int> &rhe);
+
+   void AppendSharedVerticesGroups(ListOfIntegerSets &groups, Array<int> &rhvtx);
+
+   void AppendSharedEdgesGroups(ListOfIntegerSets &groups, Array<int> &rhe);
+
+   void BuildVertexGroup(int ngroups, const Array<int>& rhvtx, int& svert_ct);
+
+   void BuildEdgeGroup(int ngroups, const Array<int>& rhe, int& sedge_ct);
+
+   void BuildSharedVerticesMapping(const int svert_ct, const Array<int>& rhvtx);
+
+   void BuildSharedEdgesMapping(const int sedges_ct, const Array<int>& rhe);
+
    // The parent Mesh
-   Mesh &parent_;
+   ParMesh &parent_;
 
    SubMesh::From from_;
 
@@ -58,6 +74,8 @@ private:
    Array<int> parent_edge_ids_;
 
    Array<int> parent_to_submesh_vertex_ids_;
+
+   Array<int> parent_to_submesh_edge_ids_;
 };
 };
 
