@@ -12,8 +12,9 @@
 #ifndef MFEM_PSUBMESH
 #define MFEM_PSUBMESH
 
-#include "pmesh.hpp"
 #include "submesh.hpp"
+#include "pmesh.hpp"
+#include "../fem/pgridfunc.hpp"
 
 namespace mfem
 {
@@ -34,6 +35,28 @@ public:
    // Mesh.
    static ParSubMesh CreateFromDomain(ParMesh &parent,
                                       Array<int> &domain_attributes);
+
+   const ParMesh* GetParent()
+   {
+      return &parent_;
+   }
+
+   const SubMesh::From GetFrom()
+   {
+      return from_;
+   }
+
+   const Array<int>& GetParentElementIDMap() const
+   {
+      return parent_element_ids_;
+   }
+
+   const Array<int>& GetParentVertexIDMap() const
+   {
+      return parent_vertex_ids_;
+   }
+
+   static void Transfer(const ParGridFunction &src, ParGridFunction &dst);
 
 private:
    // Private constructor

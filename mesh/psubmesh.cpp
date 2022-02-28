@@ -436,3 +436,48 @@ void ParSubMesh::BuildSharedEdgesMapping(const int sedges_ct,
       }
    }
 }
+
+void ParSubMesh::Transfer(const ParGridFunction &src, ParGridFunction &dst)
+{
+   Array<int> src_vdofs;
+   Array<int> dst_vdofs;
+   Vector vec;
+
+   if (dynamic_cast<const ParSubMesh *>(src.ParFESpace()->GetParMesh()) != nullptr)
+   {
+      MFEM_ABORT("not implemented yet");
+   }
+   else if (dynamic_cast<const ParSubMesh *>(dst.ParFESpace()->GetParMesh()) !=
+            nullptr)
+   {
+      // ParMesh to ParSubMesh transfer
+      ParMesh *src_mesh = src.ParFESpace()->GetParMesh();
+      ParSubMesh *dst_mesh = static_cast<ParSubMesh *>
+                             (dst.ParFESpace()->GetParMesh());
+      MFEM_ASSERT(dst_mesh->GetParent() == src_mesh,
+                  "The Meshes of the specified GridFunction are not related in a Mesh -> SubMesh relationship.");
+
+      auto &parent_element_ids = dst_mesh->GetParentElementIDMap();
+
+      IntegrationPointTransformation Tr;
+      DenseMatrix vals, vals_transpose;
+      for (int i = 0; i < dst_mesh->GetNE(); i++)
+      {
+         dst.ParFESpace()->GetElementVDofs(i, dst_vdofs);
+         if (dst_mesh->GetFrom() == SubMesh::From::Domain)
+         {
+            src.ParFESpace()->GetElementVDofs(parent_element_ids[i], src_vdofs);
+         }
+         else if (dst_mesh->GetFrom() == SubMesh::From::Boundary)
+         {
+            MFEM_ABORT("TODO");
+         }
+         src.GetSubVector(src_vdofs, vec);
+         dst.SetSubVector(dst_vdofs, vec);
+      }
+   }
+   else
+   {
+      MFEM_ABORT("Trying to do a transfer between ParGridFunctions but none of them is defined on a ParSubMesh");
+   }
+}

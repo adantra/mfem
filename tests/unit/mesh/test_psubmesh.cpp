@@ -54,16 +54,16 @@ TEST_CASE("ParSubMesh", "[Parallel],[ParSubMesh]")
 
    auto fec = H1_FECollection(2, 2, BasisType::GaussLobatto);
 
-   FiniteElementSpace parent_fes(&pmesh, &fec);
-   GridFunction parent_gf(&parent_fes);
+   ParFiniteElementSpace parent_fes(&pmesh, &fec);
+   ParGridFunction parent_gf(&parent_fes);
 
    Array<int> subdomain_attributes(1);
    subdomain_attributes[0] = 2;
 
    auto submesh = ParSubMesh::CreateFromDomain(pmesh, subdomain_attributes);
 
-   FiniteElementSpace submesh_fes(&submesh, &fec);
-   GridFunction sub_gf(&submesh_fes);
+   ParFiniteElementSpace submesh_fes(&submesh, &fec);
+   ParGridFunction sub_gf(&submesh_fes);
 
    auto coeff = FunctionCoefficient([](const Vector &coords)
    {
@@ -73,9 +73,8 @@ TEST_CASE("ParSubMesh", "[Parallel],[ParSubMesh]")
    });
 
    parent_gf.ProjectCoefficient(coeff);
-   sub_gf.ProjectCoefficient(coeff);
 
-   // SubMesh::Transfer(gf, parent_gf);
+   ParSubMesh::Transfer(parent_gf, sub_gf);
 
    int num_procs, rank;
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
@@ -87,9 +86,9 @@ TEST_CASE("ParSubMesh", "[Parallel],[ParSubMesh]")
    sol_sock << "parallel " << num_procs << " " << rank << "\n";
    sol_sock.precision(8);
    // sol_sock << "mesh\n" << submesh << std::flush;
-   // sol_sock << "solution\n" << submesh << sub_gf << std::flush;
+   sol_sock << "solution\n" << submesh << sub_gf << std::flush;
    // sol_sock << "mesh\n" << pmesh << std::flush;
-   sol_sock << "solution\n" << pmesh << parent_gf << std::flush;
+   // sol_sock << "solution\n" << pmesh << parent_gf << std::flush;
    // sol_sock << "keys ennrRlm\n" << std::flush;
 }
 

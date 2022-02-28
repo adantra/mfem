@@ -20,78 +20,80 @@ namespace mfem
 class SubMesh : public Mesh
 {
 public:
-    // Indicator from which part of the parent Mesh the SubMesh is created.
-    enum From
-    {
-        Domain,
-        Boundary
-    };
+   // Indicator from which part of the parent Mesh the SubMesh is created.
+   enum From
+   {
+      Domain,
+      Boundary
+   };
 
-    SubMesh(SubMesh &&submesh) = default;
+   SubMesh(SubMesh &&submesh) = default;
 
-    SubMesh& operator=(SubMesh &&submesh) = delete;
+   SubMesh& operator=(SubMesh &&submesh) = delete;
 
-    SubMesh& operator=(const SubMesh &submesh) = delete;
+   SubMesh& operator=(const SubMesh &submesh) = delete;
 
-    SubMesh() = delete;
+   SubMesh() = delete;
 
-    // Create a domain SubMesh from it's parent.
-    //
-    // The attributes have to mark exactly one connected subset of the parent
-    // Mesh.
-    static SubMesh CreateFromDomain(const Mesh &parent,
-                                    Array<int> domain_attributes);
+   // Create a domain SubMesh from it's parent.
+   //
+   // The attributes have to mark exactly one connected subset of the parent
+   // Mesh.
+   static SubMesh CreateFromDomain(const Mesh &parent,
+                                   Array<int> domain_attributes);
 
-    // Create a boundary SubMesh from it's parent.
-    //
-    // The attributes have to mark exactly one connected subset of the parent
-    // Mesh.
-    static SubMesh CreateFromBoundary(const Mesh &parent,
-                                      Array<int> boundary_attributes);
+   // Create a boundary SubMesh from it's parent.
+   //
+   // The attributes have to mark exactly one connected subset of the parent
+   // Mesh.
+   static SubMesh CreateFromBoundary(const Mesh &parent,
+                                     Array<int> boundary_attributes);
 
-    const Mesh* GetParent() {
-        return &parent_;
-    }
+   const Mesh* GetParent()
+   {
+      return &parent_;
+   }
 
-    const From GetFrom() {
-        return from_;
-    }
+   const From GetFrom()
+   {
+      return from_;
+   }
 
-    const Array<int>& GetParentElementIDMap() const
-    {
-        return parent_element_ids_;
-    }
+   const Array<int>& GetParentElementIDMap() const
+   {
+      return parent_element_ids_;
+   }
 
-    const Array<int>& GetParentVertexIDMap() const
-    {
-        return parent_vertex_ids_;
-    }
+   const Array<int>& GetParentVertexIDMap() const
+   {
+      return parent_vertex_ids_;
+   }
 
-    // Transfer the dofs of a GridFunction on a SubMesh to a GridFunction on the
-    // Mesh.
-    static void Transfer(const GridFunction &src, GridFunction &dst);
+   // Transfer the dofs of a GridFunction on a SubMesh to a GridFunction on the
+   // Mesh.
+   static void Transfer(const GridFunction &src, GridFunction &dst);
 
-    ~SubMesh();
+   ~SubMesh();
 
 private:
-    // Private constructor
-    SubMesh(const Mesh &parent, From from, Array<int> attributes);
+   // Private constructor
+   SubMesh(const Mesh &parent, From from, Array<int> attributes);
 
-    // The parent Mesh
-    const Mesh &parent_;
+   // The parent Mesh
+   const Mesh &parent_;
 
-    From from_;
+   From from_;
 
-    Array<int> attributes_;
-    Array<int> element_ids_;
+   Array<int> attributes_;
+   Array<int> element_ids_;
 
-    // Mapping from submesh element ids (index of the array), to
-    // the parent element ids.
-    Array<int> parent_element_ids_;
+   // Mapping from submesh element ids (index of the array), to
+   // the parent element ids.
+   Array<int> parent_element_ids_;
 
-    // Mapping from submesh vertex ids (index of the array), to
-    // the parent vertex ids.
-    Array<int> parent_vertex_ids_;
+   // Mapping from submesh vertex ids (index of the array), to
+   // the parent vertex ids.
+   Array<int> parent_vertex_ids_;
 };
 };
 
