@@ -970,4 +970,14 @@ void QuadratureLFIntegrator::AssembleRHSElementVect(const FiniteElement &fe,
    }
 }
 
+
+void GaussianWhiteNoiseDomainLFIntegrator::AssembleRHSElementVect
+(const FiniteElement &el,
+ ElementTransformation &Tr,
+ Vector &elvect)
+{
+   MFEM_ABORT("GaussianWhiteNoiseDomainLFIntegrator::AssembleRHSElementVect::TODO");
+}
+
+
 }
