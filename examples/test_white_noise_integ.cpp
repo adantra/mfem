@@ -45,7 +45,8 @@ int main(int argc, char *argv[])
    //    Dirichlet in order to enforce zero boundary conditions.
    LinearForm b(&fespace);
    int seed = 4000;
-   GaussianWhiteNoiseDomainLFIntegrator *WhiteNoise = new GaussianWhiteNoiseDomainLFIntegrator(fespace, seed);
+   GaussianWhiteNoiseDomainLFIntegrator *WhiteNoise = new
+   GaussianWhiteNoiseDomainLFIntegrator(fespace, seed);
    b.AddDomainIntegrator(WhiteNoise);
    b.Assemble();
 
@@ -89,7 +90,7 @@ int main(int argc, char *argv[])
    BilinearForm a(&fespace);
    a.AddDomainIntegrator(new MassIntegrator());
    a.Assemble();
-   
+
    SparseMatrix M;
    Array<int> empty;
    a.FormSystemMatrix(empty,M);

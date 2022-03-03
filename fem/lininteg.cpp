@@ -977,8 +977,9 @@ void GaussianWhiteNoiseDomainLFIntegrator::AssembleRHSElementVect
  Vector &elvect)
 {
    int ElNo = Tr.ElementNo;
-   MFEM_VERIFY(&el == fes->GetFE(ElNo), "GaussianWhiteNoiseDomainLFIntegrator::AssembleRHSElementVect : Incompatible FE space");
-   
+   MFEM_VERIFY(&el == fes->GetFE(ElNo),
+               "GaussianWhiteNoiseDomainLFIntegrator::AssembleRHSElementVect : Incompatible FE space");
+
    massinteg.AssembleElementMatrix(el, Tr, M);
    CholeskyFactors chol(M);
    chol.Factor('L');
