@@ -235,11 +235,11 @@ int main(int argc, char *argv[])
    S = Mult(B, *MinvBt);
    invM = new DSmoother(M);
 
-   #ifndef MFEM_USE_SUITESPARSE
-         invS = new GSSmoother(*S);
-   #else
-         invS = new UMFPackSolver(*S);
-   #endif
+#ifndef MFEM_USE_SUITESPARSE
+   invS = new GSSmoother(*S);
+#else
+   invS = new UMFPackSolver(*S);
+#endif
 
    invM->iterative_mode = false;
    invS->iterative_mode = false;
@@ -264,17 +264,19 @@ int main(int argc, char *argv[])
    pp.ProjectCoefficient(pcoeff);
    pp.SetTrueVector();
    Vector p0;
-   
+
    // 11b. Perform time-integration
    int nt = (int) t_final / dt;
    for (int i = 0; i <= nt; i++)
-   {  
-      // Initialize solution vector x=[u,p] 
+   {
+      // Initialize solution vector x=[u,p]
       x = 0.0;
-      if (i==0) {
+      if (i==0)
+      {
          p0 = pp.GetTrueVector();
       }
-      else {
+      else
+      {
          p0 =  x.GetBlock(1);
       }
       Getrhs(R_space, W_space, fform, gform, fcoeff,
@@ -284,7 +286,7 @@ int main(int argc, char *argv[])
       rhs.Print();
 
       solver.Mult(rhs, x);
-     
+
       if (device.IsEnabled()) { x.HostRead(); }
 
       if (solver.GetConverged())
@@ -450,7 +452,7 @@ void Getrhs(FiniteElementSpace *R, FiniteElementSpace *W,
             LinearForm *f, LinearForm *g, VectorCoefficient &fcoeff,
             Coefficient &fnatcoeff, Coefficient &gcoeff, int i, double dt,
             Vector &p, SparseMatrix *C, BlockVector &rhs)
-{  
+{
    // First block of rhs, rhs[0] = f
    f->Update(R, rhs.GetBlock(0), 0);
    f->AddDomainIntegrator(new VectorFEDomainLFIntegrator(fcoeff));
@@ -474,7 +476,7 @@ void Getrhs(FiniteElementSpace *R, FiniteElementSpace *W,
    C->Mult(p, v);
    // v = v/dt
    v /= dt;
-   
+
    rhs *=exp(-(i+1)*dt);
    // Update rhs[1]= rhs[1] + v
    add(v, rhs.GetBlock(1), rhs.GetBlock(1));
