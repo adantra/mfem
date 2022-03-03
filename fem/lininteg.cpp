@@ -980,6 +980,8 @@ void GaussianWhiteNoiseDomainLFIntegrator::AssembleRHSElementVect
    MFEM_VERIFY(&el == fes->GetFE(ElNo),
                "GaussianWhiteNoiseDomainLFIntegrator::AssembleRHSElementVect : Incompatible FE space");
 
+#ifdef MFEM_USE_LAPACK
+
    massinteg.AssembleElementMatrix(el, Tr, M);
    CholeskyFactors chol(M);
    chol.Factor('L');
@@ -995,6 +997,13 @@ void GaussianWhiteNoiseDomainLFIntegrator::AssembleRHSElementVect
    chol.LMult(local_w,elvect);
 
    if (ElNo == fes->GetMesh()->GetNE()-1) { cnt = 0; }
+
+#else
+
+   MFEM_ABORT("TODO");
+
+#endif
+
 }
 
 }

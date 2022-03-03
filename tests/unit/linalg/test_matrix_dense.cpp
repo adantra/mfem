@@ -267,6 +267,7 @@ TEST_CASE("LUFactors RightSolve", "[DenseMatrix]")
    REQUIRE(C.MaxMaxNorm() < tol);
 }
 
+#ifdef MFEM_USE_LAPACK
 
 TEST_CASE("CholeskyFactors", "[DenseMatrix]")
 {
@@ -360,6 +361,7 @@ TEST_CASE("CholeskyFactors", "[DenseMatrix]")
 
 }
 
+#endif
 
 TEST_CASE("DenseTensor LinearSolve methods",
           "[DenseMatrix]")
