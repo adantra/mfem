@@ -333,8 +333,8 @@ TEST_CASE("CholeskyFactors", "[DenseMatrix]")
    U-=Uref;
 
    Vector y1(4),y2(4);
-   cholA.UMult(x,y1);
    Uref.Mult(x,y2);
+   cholA.UMult(x,y1);
    y1-=y2;
    REQUIRE(y1.Norml2() == MFEM_Approx(0.,tol));
 
@@ -342,10 +342,18 @@ TEST_CASE("CholeskyFactors", "[DenseMatrix]")
    y1-=y2;
    REQUIRE(y1.Norml2() == MFEM_Approx(0.,tol));
 
-
    REQUIRE(U.MaxMaxNorm() == MFEM_Approx(0.,tol));
 
    Uref.Transpose();
+
+   Uref.Mult(x,y2);
+   cholA.LMult(x,y1);
+   y1-=y2;
+   REQUIRE(y1.Norml2() == MFEM_Approx(0.,tol));
+
+   cholB.LMult(x,y1);
+   y1-=y2;
+   REQUIRE(y1.Norml2() == MFEM_Approx(0.,tol));
 
    L-=Uref;
    REQUIRE(L.MaxMaxNorm() == MFEM_Approx(0.,tol));

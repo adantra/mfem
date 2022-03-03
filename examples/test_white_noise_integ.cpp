@@ -38,13 +38,77 @@ int main(int argc, char *argv[])
    //    high-order Lagrange finite elements of the given order.
    H1_FECollection fec(order, mesh.Dimension());
    FiniteElementSpace fespace(&mesh, &fec);
-   cout << "Number of unknowns: " << fespace.GetTrueVSize() << endl;
+   int ndofs = fespace.GetTrueVSize();
+   cout << "Number of unknowns: " << ndofs << endl;
 
    // 4. Extract the list of all the boundary DOFs. These will be marked as
    //    Dirichlet in order to enforce zero boundary conditions.
    LinearForm b(&fespace);
-   b.AddDomainIntegrator(new GaussianWhiteNoiseDomainLFIntegrator());
+   int seed = 4000;
+   GaussianWhiteNoiseDomainLFIntegrator *WhiteNoise = new GaussianWhiteNoiseDomainLFIntegrator(fespace, seed);
+   b.AddDomainIntegrator(WhiteNoise);
    b.Assemble();
+
+   b.Print();
+   mfem::out << endl;
+
+   // WhiteNoise->Reset();
+   // b.Assemble();
+
+   // b.Print();
+
+   Vector bmean(ndofs);
+   bmean = 0.0;
+   int N = 1000000;
+   for (int i = 0; i < N; i++)
+   {
+      WhiteNoise->Reset();
+      b.Assemble();
+      bmean += b;
+   }
+   bmean *= 1.0/(double)N;
+
+   double diff = bmean.Normlinf();
+   mfem::out << "mean error = " << diff << "\n" << endl;
+
+   DenseMatrix C(ndofs);
+   C = 0.0;
+
+   for (int i = 0; i < N; i++)
+   {
+      WhiteNoise->Reset();
+      b.Assemble();
+      AddMultVVt(b, C);
+   }
+   C *= 1.0/(double)N;
+
+   mfem::out << "C" << endl;
+   C.PrintMatlab();
+   mfem::out << endl;
+
+   BilinearForm a(&fespace);
+   a.AddDomainIntegrator(new MassIntegrator());
+   a.Assemble();
+   
+   SparseMatrix M;
+   Array<int> empty;
+   a.FormSystemMatrix(empty,M);
+   DenseMatrix Mdense;
+   M.ToDenseMatrix(Mdense);
+
+   mfem::out << "M" << endl;
+   Mdense.PrintMatlab();
+   mfem::out << endl;
+
+   Mdense -= C;
+
+   mfem::out << "M - C" << endl;
+   Mdense.PrintMatlab();
+   mfem::out << endl;
+
+   diff = Mdense.MaxMaxNorm();
+
+   mfem::out << "covariance error = " << diff << endl;
 
    return 0;
 }

@@ -644,10 +644,6 @@ class CholeskyFactors
    bool factorized = false;
 public:
 
-   /** With this constructor, the (public) data and ipiv members should be set
-       explicitly before calling class methods. */
-   CholeskyFactors() { }
-
    CholeskyFactors(DenseMatrix & A_) : A(&A_)
    {
       n = A->Height();
@@ -660,9 +656,15 @@ public:
    // A = L L^t or A = U^t U
    void Factor(char uplo_ = 'U');
 
+   void GetL(DenseMatrix & L);
+
    void GetU(DenseMatrix & U);
 
-   void GetL(DenseMatrix & L);
+   // Assuming L L^t = A
+   // y = L x
+   // Assuming U^t U = A
+   // y = U^t x
+   void LMult(const Vector & x, Vector & y) const;
 
    // Assuming L L^t = A
    // y = L^t x

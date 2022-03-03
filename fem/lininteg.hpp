@@ -14,6 +14,8 @@
 
 #include "../config/config.hpp"
 #include "coefficient.hpp"
+#include "bilininteg.hpp"
+#include <random>
 
 namespace mfem
 {
@@ -584,11 +586,44 @@ public:
 /// Class for spatial Gaussian white noise integration L(v) := (\dot{W}, v)
 class GaussianWhiteNoiseDomainLFIntegrator : public LinearFormIntegrator
 {
+   MassIntegrator massinteg;
+   DenseMatrix M;
+   Vector w;
+   int cnt;
+   FiniteElementSpace *fes;
+
+   // Define random generator with Gaussian distribution
+   std::default_random_engine generator;
+   std::normal_distribution<double> dist;
+
    int seed;
 public:
    /// Constructs a domain integrator with a given seed
-   GaussianWhiteNoiseDomainLFIntegrator(int seed_ = 0)
-      : LinearFormIntegrator(), seed(seed_) { }
+   GaussianWhiteNoiseDomainLFIntegrator(FiniteElementSpace &fespace, int seed_ = 0)
+      : LinearFormIntegrator(), fes(&fespace), seed(seed_)
+   {
+      int NE = fes->GetMesh()->GetNE();
+      int ndofs = 0;
+      for (int i = 0; i < NE; i++)
+      {
+         ndofs += fes->GetFE(i)->GetDof();
+      }
+      w.SetSize(ndofs);
+      // w.SetGlobalSeed(seed);
+      Reset(seed);
+   }
+
+   void Reset(int seed = 0)
+   {
+      if (seed != 0)
+      {
+         generator.seed(seed);
+      }
+      for (int i = 0; i < w.Size(); i++)
+      {
+         w(i) = dist(generator);
+      }
+   }
 
    virtual void AssembleRHSElementVect(const FiniteElement &el,
                                        ElementTransformation &Tr,

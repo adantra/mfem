@@ -3218,24 +3218,6 @@ void CholeskyFactors::Factor(char uplo_)
    factorized = true;
 }
 
-
-void CholeskyFactors::GetU(DenseMatrix & U)
-{
-   MFEM_VERIFY(factorized,
-               "Matrix not factorized yet. Call CholeskyFactors::Factor()");
-   MFEM_VERIFY(uplo == 'U', "Wrong code path. Use GetL");
-   U.SetSize(n);
-   U = 0.;
-
-   for (int i = 0; i<n; i++)
-   {
-      for (int j = i; j<n ; j++)
-      {
-         U(i,j) = (*A)(i,j);
-      }
-   }
-}
-
 void CholeskyFactors::GetL(DenseMatrix & L)
 {
    MFEM_VERIFY(factorized,
@@ -3253,7 +3235,56 @@ void CholeskyFactors::GetL(DenseMatrix & L)
    }
 }
 
+void CholeskyFactors::GetU(DenseMatrix & U)
+{
+   MFEM_VERIFY(factorized,
+               "Matrix not factorized yet. Call CholeskyFactors::Factor()");
+   MFEM_VERIFY(uplo == 'U', "Wrong code path. Use GetL");
+   U.SetSize(n);
+   U = 0.;
 
+   for (int i = 0; i<n; i++)
+   {
+      for (int j = i; j<n ; j++)
+      {
+         U(i,j) = (*A)(i,j);
+      }
+   }
+}
+void CholeskyFactors::LMult(const Vector & x, Vector & y) const
+{
+   MFEM_VERIFY(x.Size() == n, "x has invalid size");
+   MFEM_VERIFY(y.Size() == n, "y has invalid size");
+
+   double * data = A->Data();
+
+   if (uplo == 'L')
+   {
+      // y <- L x
+      for (int i = 0; i < n; i++)
+      {
+         double y_i = 0.;
+         for (int j = 0; j <= i; j++)
+         {
+            y_i += x(j) * data[i+n*j];
+         }
+         y(i) = y_i;
+      }
+   }
+   else
+   {
+      // y <- U^t x
+      for (int i = 0; i < n; i++)
+      {
+         double y_i = 0.;
+         for (int j = 0; j <= i; j++)
+         {
+            y_i += x(j) * data[j+n*i];
+         }
+         y(i) = y_i;
+      }
+   }
+}
 
 void CholeskyFactors::UMult(const Vector & x, Vector & y) const
 {

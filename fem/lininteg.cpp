@@ -976,8 +976,24 @@ void GaussianWhiteNoiseDomainLFIntegrator::AssembleRHSElementVect
  ElementTransformation &Tr,
  Vector &elvect)
 {
-   MFEM_ABORT("GaussianWhiteNoiseDomainLFIntegrator::AssembleRHSElementVect::TODO");
-}
+   int ElNo = Tr.ElementNo;
+   MFEM_VERIFY(&el == fes->GetFE(ElNo), "GaussianWhiteNoiseDomainLFIntegrator::AssembleRHSElementVect : Incompatible FE space");
+   
+   massinteg.AssembleElementMatrix(el, Tr, M);
+   CholeskyFactors chol(M);
+   chol.Factor('L');
 
+   int n = el.GetDof();
+   elvect.SetSize(n);
+
+   double * data = w.GetData();
+   Vector local_w;
+   local_w.SetDataAndSize(&data[cnt],n);
+   cnt += n;
+
+   chol.LMult(local_w,elvect);
+
+   if (ElNo == fes->GetMesh()->GetNE()-1) { cnt = 0; }
+}
 
 }
