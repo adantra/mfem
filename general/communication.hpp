@@ -26,25 +26,57 @@
 namespace mfem
 {
 
+class MPI
+{
+public:
+   static MPI &Session()
+   {
+      MPI &mpi = Instance();
+      MFEM_VERIFY(mpi.initialized, "MPI not initialized!");
+      return mpi;
+   }
+   static void Init() { Init_(NULL, NULL); }
+   static void Init(int &argc, char **&argv) { Init_(&argc, &argv); }
+   int WorldRank() const { return world_rank; }
+   int WorldSize() const { return world_size; }
+   bool Root() const { return world_rank == 0; }
+private:
+   int world_rank = 0;
+   int world_size = 0;
+   bool initialized = false;
+   static MPI &Instance()
+   {
+      static MPI mpi;
+      return mpi;
+   }
+   static void Init_(int *argc, char ***argv)
+   {
+      mfem::out << "Initializing MPI\n";
+      MPI &mpi = Instance();
+      MFEM_VERIFY(!mpi.initialized, "MPI already initialized!")
+      MPI_Init(argc, argv);
+      MPI_Comm_rank(MPI_COMM_WORLD, &mpi.world_rank);
+      MPI_Comm_size(MPI_COMM_WORLD, &mpi.world_size);
+      mpi.initialized = true;
+   }
+   MPI() { }
+   ~MPI() { mfem::out << "Finalizing MPI\n"; MPI_Finalize(); }
+};
+
 /** @brief A simple convenience class that calls MPI_Init() at construction and
     MPI_Finalize() at destruction. It also provides easy access to
     MPI_COMM_WORLD's rank and size. */
 class MPI_Session
 {
-protected:
-   int world_rank, world_size;
-   void GetRankAndSize();
 public:
-   MPI_Session() { MPI_Init(NULL, NULL); GetRankAndSize(); }
-   MPI_Session(int &argc, char **&argv)
-   { MPI_Init(&argc, &argv); GetRankAndSize(); }
-   ~MPI_Session() { MPI_Finalize(); }
+   MPI_Session() { MPI::Init(); }
+   MPI_Session(int &argc, char **&argv) { MPI::Init(argc, argv); }
    /// Return MPI_COMM_WORLD's rank.
-   int WorldRank() const { return world_rank; }
+   int WorldRank() const { return MPI::Session().WorldRank(); }
    /// Return MPI_COMM_WORLD's size.
-   int WorldSize() const { return world_size; }
+   int WorldSize() const { return MPI::Session().WorldSize(); }
    /// Return true if WorldRank() == 0.
-   bool Root() const { return world_rank == 0; }
+   bool Root() const { return MPI::Session().Root(); }
 };
 
 
