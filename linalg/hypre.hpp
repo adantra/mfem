@@ -49,6 +49,42 @@
 namespace mfem
 {
 
+class HypreSession
+{
+public:
+   static HypreSession &Instance()
+   {
+      static HypreSession hypre_session;
+      return hypre_session;
+   }
+   static void Init() { Instance(); }
+
+   void UseCuSparseGemm(bool use_cusparse) const
+   {
+#if MFEM_HYPRE_VERSION >= 22100
+      HYPRE_SetSpGemmUseCusparse(use_cusparse);
+#endif
+   }
+
+private:
+
+   HypreSession()
+   {
+      mfem::out << "Initializing hypre\n";
+#if MFEM_HYPRE_VERSION >= 21500
+      HYPRE_Init();
+#endif
+      UseCuSparseGemm(false);
+   }
+   ~HypreSession()
+   {
+      mfem::out << "Finalizing hypre\n";
+#if MFEM_HYPRE_VERSION >= 21500
+      HYPRE_Finalize();
+#endif
+   }
+};
+
 class ParFiniteElementSpace;
 class HypreParMatrix;
 
