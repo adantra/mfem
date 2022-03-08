@@ -35,6 +35,7 @@ public:
       MFEM_VERIFY(mpi.initialized, "MPI not initialized!");
       return mpi;
    }
+   static bool IsInitialized() { return Instance().initialized; }
    static void Init() { Init_(NULL, NULL); }
    static void Init(int &argc, char **&argv) { Init_(&argc, &argv); }
    int WorldRank() const { return world_rank; }
